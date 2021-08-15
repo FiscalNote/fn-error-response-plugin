@@ -1,173 +1,153 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<groupId>com.fiscalnote</groupId>
-	<artifactId>mule4-api-template</artifactId>
-	<version>1.0.0</version>
-	<packaging>mule-application</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>45e92f98-058f-4716-850d-bba6d068e4da</groupId>
+    <artifactId>mule-error-response-plugin</artifactId>
+    <version>1.0.0</version>
+    <packaging>mule-extension</packaging>
+    <name>FiscalNote Common Error Response Plugin</name>
 
-	<name>fn-mule4-api-template</name>
-
+    <parent>
+        <groupId>org.mule.extensions</groupId>
+        <artifactId>mule-modules-parent</artifactId>
+        <version>1.1.2</version>
+    </parent>
+    
+    <description>Mule modules that augment the core Mule functionality through the Mule Extension API</description>
+	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-		<app.runtime>4.3.0</app.runtime>
-		<mule.maven.plugin.version>3.4.1</mule.maven.plugin.version>
-		<munit.version>2.3.1</munit.version>
+		<!-- XML SDK properties -->
+		<mule.version>4.1.5</mule.version>
+		<mule.extensions.maven.plugin.version>1.1.5</mule.extensions.maven.plugin.version>
+		<munit.version>2.1.3</munit.version>
+		<munit.extensions.maven.plugin.version>1.0.0-BETA</munit.extensions.maven.plugin.version>
+		<munit.input.directory>src/test/munit</munit.input.directory>
+		<munit.output.directory>${basedir}/target/test-mule/munit</munit.output.directory>
+		
+		<maven.source.plugin.version>3.0.1</maven.source.plugin.version>
+		<maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
+		<maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
+		<maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
+		<maven.install.plugin.version>2.5.2</maven.install.plugin.version>
+		<maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
+		<maven.site.plugin.version>3.6.1</maven.site.plugin.version>
+		<maven.javadoc.plugin.version>3.0.1</maven.javadoc.plugin.version>
+		<maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
+		<app.runtime>4.1.5</app.runtime>
+		<mule.module.http.version>1.2.0</mule.module.http.version>
+		<spring.app.runtime>4.2.1</spring.app.runtime>
 	</properties>
-
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/FiscalNote/REPLACE_ME</url>
-		</repository>
+   
+    <distributionManagement>
+	    <repository>
+	      <id>mule-exchange-api-team-repository</id>
+		  <name>Exchange API Team Repository</name>
+		  <url>https://maven.anypoint.mulesoft.com/api/v2/organizations/45e92f98-058f-4716-850d-bba6d068e4da/maven</url>
+		  <layout>default</layout>
+	    </repository>
 	</distributionManagement>
-
+  
+	<dependencies>
+		<!--Needed to discover the 'xml-based' XmlExtensionLoader for smart connectors -->
+		<dependency>
+			<groupId>org.mule.runtime</groupId>
+			<artifactId>mule-module-extensions-xml-support</artifactId>
+			<version>${mule.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- DataWeave -->
+		<dependency>
+			<groupId>com.mulesoft.mule.runtime.modules</groupId>
+			<artifactId>mule-module-spring-config-ee</artifactId>
+			<version>${spring.app.runtime}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	
 	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- Maven Plugins -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>${maven.clean.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven.source.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven.compiler.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>${maven.install.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>${maven.deploy.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven.site.plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven.javadoc.plugin.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.0.0</version>
-			</plugin>
-			<plugin>
-				<groupId>org.mule.tools.maven</groupId>
-				<artifactId>mule-maven-plugin</artifactId>
-				<version>${mule.maven.plugin.version}</version>
+				<!-- Build plugin for XML SDK extension -->
+				<groupId>org.mule.runtime.plugins</groupId>
+				<artifactId>mule-extensions-maven-plugin</artifactId>
+				<version>${mule.extensions.maven.plugin.version}</version>
 				<extensions>true</extensions>
-				<configuration>
-					<classifier>mule-application</classifier>
-					<cloudHubDeployment>
-						<uri>https://anypoint.mulesoft.com</uri>
-						<muleVersion>${app.runtime}</muleVersion>
-						<applicationName>${cloudhub.applicationName}</applicationName>
-						<environment>${cloudhub.environment}</environment>
-						<workers>${cloudhub.workers}</workers>
-						<workerType>${cloudhub.workerType}</workerType>
-						<region>${cloudhub.region}</region>
-						<businessGroupId>${cloudhub.businessGroupId}</businessGroupId>
-						<connectedAppClientId>${cloudhub.connectedAppClientId}</connectedAppClientId>
-						<connectedAppClientSecret>${cloudhub.connectedAppClientSecret}</connectedAppClientSecret>
-						<connectedAppGrantType>client_credentials</connectedAppGrantType>
-						<properties>
-							<mule.key>${mule.key}</mule.key>
-							<mule.env>${mule.env}</mule.env>
-							<anypoint.platform.client_id>${cloudhub.environment.clientId}</anypoint.platform.client_id>
-							<anypoint.platform.client_secret>${cloudhub.environment.clientSecret}</anypoint.platform.client_secret>
-							<anypoint.platform.config.analytics.agent.enabled>${cloudhub.environment.analyticsAgentEnabled}</anypoint.platform.config.analytics.agent.enabled>
-						</properties>
-					</cloudHubDeployment>
-				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>com.mulesoft.munit.tools</groupId>
-				<artifactId>munit-maven-plugin</artifactId>
-				<version>${munit.version}</version>
-				<executions>
-					<execution>
-						<id>test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-							<goal>coverage-report</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<coverage>
-						<runCoverage>true</runCoverage>
-						<formats>
-							<format>html</format>
-						</formats>
-					</coverage>
-				</configuration>
+				<groupId>com.mulesoft.munit</groupId>
+				<artifactId>munit-extensions-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-sockets-connector</artifactId>
-			<version>1.2.0</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>55278f41-739f-4cde-8b2e-6aa3592eb7a5</groupId>
-			<artifactId>logger-mule-extension</artifactId>
-			<version>1.0.0</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>55278f41-739f-4cde-8b2e-6aa3592eb7a5</groupId>
-			<artifactId>common-error-flows</artifactId>
-			<version>1.0.0</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.mulesoft.modules</groupId>
-			<artifactId>mule-secure-configuration-property-module</artifactId>
-			<version>1.2.3</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>55278f41-739f-4cde-8b2e-6aa3592eb7a5</groupId>
-			<artifactId>fn-common-utils</artifactId>
-			<version>1.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-apikit-module</artifactId>
-			<version>1.3.18</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-http-connector</artifactId>
-			<version>1.5.23</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-	</dependencies>
+    
+	<profiles>
+		<profile>
+			<id>exchange</id>
+			<distributionManagement>
+				<repository>
+					<id>mule-exchange-api-team-repository</id>
+					<name>Exchange API Team Repository</name>
+					<url>https://maven.anypoint.mulesoft.com/api/v2/organizations/45e92f98-058f-4716-850d-bba6d068e4da/maven</url>
+					<layout>default</layout>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
 
 	<repositories>
 		<repository>
-			<id>anypoint-exchange-v2</id>
-			<name>Anypoint Exchange</name>
-			<url>https://maven.anypoint.mulesoft.com/api/v2/maven</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
 			<id>mulesoft-releases</id>
 			<name>MuleSoft Releases Repository</name>
-			<url>https://repository.mulesoft.org/releases/</url>
+			<url>http://repository.mulesoft.org/releases/</url>
 			<layout>default</layout>
 		</repository>
 		<repository>
-			<id>mule-exchange-core-repository</id>
-			<name>Exchange Core Repository</name>
-			<url>https://maven.anypoint.mulesoft.com/api/v2/organizations/55278f41-739f-4cde-8b2e-6aa3592eb7a5/maven</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>mule-exchange-api-team-repository</id>
-			<name>Exchange API Team Repository</name>
-			<url>https://maven.anypoint.mulesoft.com/api/v2/organizations/45e92f98-058f-4716-850d-bba6d068e4da/maven</url>
+			<id>mulesoft-snapshots</id>
+			<name>MuleSoft Snapshots Repository</name>
+			<url>https://repository.mulesoft.org/snapshots/</url>
 			<layout>default</layout>
 		</repository>
 	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>mulesoft-releases</id>
-			<name>mulesoft release repository</name>
-			<layout>default</layout>
-			<url>https://repository.mulesoft.org/releases/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
+
 </project>

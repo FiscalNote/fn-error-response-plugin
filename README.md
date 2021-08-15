@@ -1,70 +1,108 @@
-# fn-mule4-api-template
-Mule 4 API template that provides an initial setup to start developing Mule applications. 
+# Error Plugin for Mule 4
 
-It contains the following features: 
-- pom.xml: 
-    - [Logger Extension dependency][1]
-    - [Common Error Handling framework dependency][2]
-    - [Secure Configuration Property dependency][3]
-    - [Sockets Connector dependency][4]
-    - [APIKit Module dependency][5]
-    - [HTTP Connector dependency][6]
-    - Common Utils dependency
-- global.xml configuration file which defines:
-    - Global property **mule.env** with a default value: **local**. The initial configuration files for the environments: **local**, **development**, **staging**, and **production** 
-    - Configuration properties loading from **config/properties/config-${mule.env}.yaml**
-    - Import **common-error-flows.xml** (loaded from the Common Error Handling framework dependency)
-    - Fiscal Note Logger Mule Extension Config with default values **Application Name: Mule::p('app.name')**, **Application Version: Mule::p('app.version')** and **Environment: Mule::p('mule.env')**
-    - API Autodiscovery configuration with values **App Id: ${api.autodiscovery.id}** and **Flow Name: ${api.autodiscovery.flow}**. If you want to set a different values you only need to edit the values in the property files.
-    - Http Listener configuration
-    - TLS Context with the next values, **Path: ${trustStore.path}**, **Password: ${secure::trustStore.password}** and **Type: ${trustStore.type}**. If you want to set a different values you only need to edit the values in the property files. 
-    - Secure Properties Config, loading from **config/properties/config-secured-${mule.env}.yaml** and it use the **${mule.key}** argument to decrypt information
-    
-# How to use
-    
-  _Prerequisite: authentication should be set in Preferences -> Anypoint Studio -> Authentication_
-    
-  - In Anypoint Studio, go to File -> New -> Project from Template 
-  - Click on the component **Mule 4 API Template**
-  ![Mule 4 API Template](/resource/ScreenShot-1.png?raw=true)
-  
-  - Click on the button **Open**
-  ![Open](/resource/ScreenShot-2.png?raw=true)
-  
-  - Once the application is created from the template, rename the project as needed.
-  - Open the **pom.xml** file and make the following changes:
-    - **groupId** to **com.mycompany** 
-    - **artifactId** with a meaningful name.
-    - **name** with a meaningful name
-    ![pom.xml](/resource/ScreenShot-3.png?raw=true)
-  
-  - Go to src/main/resources/config and open the different configuration files to make the following changes:
-  ```
-  api:
-    autodiscovery:
-      id: <API ID from API Manager>
-      flow: <API's main flow name>
-  ```
-  - [Import the API RAML spec from Anypoint Studio][7]. This will use APIkit for generating the implementation flows. 
-  - Delete the **my-spec.xml** file in the **src/main/mule/spec** and move the generate (name-of-api.xml) file to this path:
-  - Open the file generated in the last step (name-of-api.xml) and make the following changes:
-    - Look for the **http:listener-config** component and modify the attributes of the **http:listener-connection**: _host_ = **${http.name}** / _port_ = **${http.private.port}**
-    - Look for the API's main flow and modify the attribute _path_ of the **http:listener** component to **${api.path}**
-    - Look for the error-handler configuration inside the API's main flow and reference to the **global-error-handler-apikit**
-  ![name-of-api.xml](/resource/ScreenShot-4.png?raw=true)
-  
-  - Develop actual flow implementations, replacing the auto-generated ones.
-  _Recomend to create a new **Mule Configuration File** inside the **src/main/mule/impl** and create your implementation flows in it. you can reference them with the **Flow Reference**.
-  
-  # How to deploy through GitHub Action
-  Modify the **mule-ci.xml** file in **.github -> workflows** folder and commit the code in the develop branch.
-  ![mule-ci.xml](/resource/ScreenShot-5.png?raw=true)
-  
-  [1]: (https://anypoint.mulesoft.com/exchange/55278f41-739f-4cde-8b2e-6aa3592eb7a5/logger-mule-extension/)
-  [2]: (https://anypoint.mulesoft.com/exchange/55278f41-739f-4cde-8b2e-6aa3592eb7a5/common-error-flows/)
-  [3]: (https://anypoint.mulesoft.com/exchange/com.mulesoft.modules/mule-secure-configuration-property-module/)
-  [4]: (https://anypoint.mulesoft.com/exchange/org.mule.connectors/mule-sockets-connector/)
-  [5]: (https://anypoint.mulesoft.com/exchange/org.mule.modules/mule-apikit-module/)
-  [6]: (https://anypoint.mulesoft.com/exchange/org.mule.connectors/mule-http-connector/)
-  [7]: (https://docs.mulesoft.com/studio/7.3/import-api-def-dc)
-  
+This custom error handler plugin allows a single module to process error messages from multiple types:
+- Error types default to mule. (HTTP, APIKIT, Connectors based, etc)
+- custom error types as defined by raise error component. 
+- Un-clutter exceptions both in UI and XML
+- User can change the custom error message (for multiple errors) in the UI rather than in the XML.
+- Users intending to use other error types should put them on on-error-propagate or on-error-continue prior to using this module.
+- No specific error type is required for this module. It can parse any error types.
+
+## Operations Supported
+On Error
+
+## Deploying to Exchange
+Add the below PluginRepository to settings.xml if not present already.
+
+```
+<pluginRepository>
+	<id>mule-repository</id>
+	<name>plugins-snapshot</name>
+	<url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
+</pluginRepository>
+```
+
+Clone the project to your local, Make necessary changes and increase the version number. Issue `mvn deploy`.
+
+Ensure that there is an entry in your settings.xml pertaining to Exchange2
+
+## Local Install
+Issue `mvn clean install`
+
+## Using the module in a Mule4 Project
+Add this dependency to your application pom.xml
+
+```
+<dependency>
+	<groupId>45e92f98-058f-4716-850d-bba6d068e4da</groupId>
+	<artifactId>mule-error-response-plugin</artifactId>
+	<version>1.0.0</version>
+	<classifier>mule-plugin</classifier>
+</dependency>
+```
+
+## Usage
+
+- Delete the auto-generated error blocks (on-error-propagate/on-error-continue) before using this module.
+- Place the plugin inside an error block (on-error-propagate/on-error-continue) along with a variable for httpStatus.
+
+
+## Tabs
+
+### General
+
+- Takes values for apiName and apiVersion. Current default values will be read from a property file `api.name` and `api.version` respectively.
+- Error section defines from what mule expression should the error be read.
+- httpStatus set variable is required to send back the httpStatus on the http response
+
+**httpStatus variable must be set for the http listener to return on the request**
+
+![alt text](general.png)
+
+### Common Errors
+Common HTTP based errors are defined in this section. Users have to provide the message they want to send back on the API error response.
+
+![alt text](commonErrors.png)
+
+### Custom Errors (`,` Delimited)
+
+Currently due to a limitation on XML SDK, text based entries are required for custom errors. The number of entries have to match else it will fail to be successfully executed.
+
+errorTypes: Have to provided as `,` separated values. Example : DB:BAD_SQL_SYNTAX, ABC:DEF
+errorCodes: Have to provided as `,` separated values. Example : 500, 599
+errorMessages: Have to provided as `,` separated values. Example : SQL Syntax is incorrect, Testing
+
+![alt text](customErrors.png)
+
+### CorrelationId
+
+A correlationId will be used for tracking transactions. The default value is #[correlationId]
+
+## Sample Usage
+
+### On Error With Default Errors
+```
+<error-handler>
+	<on-error-propagate enableNotifications="true"
+		logException="true" doc:name="On Error Propagate" doc:id="b995ec19-3b56-4b8e-8b0f-b172cead9be4">
+		<error-handler-plugin:on-error doc:name="On error" doc:id="42db8478-b083-48b4-b31f-6638e6a6f18a" />
+		<set-variable value="#[attributes.httpStatus]"
+			doc:name="Set Variable" doc:id="2151ced0-a42f-4c0d-b439-455abd354277"
+			variableName="httpStatus" />
+	</on-error-propagate>
+</error-handler>
+```
+
+### On Error With Custom Errors
+```
+<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b995ec19-3b56-4b8e-8b0f-b172cead9be4">
+	<error-handler-plugin:on-error doc:name="On error" 
+		doc:id="2108e03c-1a96-4dcd-976e-26d9f5f5f158" 
+			errorTypes="DB:BAD_SQL_SYNTAX, ABC:DEF" 
+			errorCodes="500, 599" 
+			errorMessages="SQL Syntax is incorrect, Testing"/>
+	<set-variable value="#[attributes.httpStatus]"
+		doc:name="Set Variable" doc:id="2151ced0-a42f-4c0d-b439-455abd354277"
+		variableName="httpStatus" />
+</on-error-propagate>
+```

@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "properties": {
+	"apiName": {
+      "type": "string"
+    },
+	"version": {
+      "type": "string"
+    },
+    "errorCode":{
+      "type": "string"
+    },
+    "transactionId": {
+      "type": "string"
+    },
+    "details":{
+      "type": "array",
+	  "items": {
+		"type": "object",
+		"properties": {
+			"code":{
+			  "type": "string"
+			},
+			"description": {
+			  "type": "string"
+			},
+			"details": {
+			  "type": "string"
+			},
+			"errors": {
+			  "type": "array",
+			  "items": {
+				"type": "object",
+				"properties": {
+					"errorCode":{
+					  "type": "string"
+					},
+					"message": {
+					  "type": "string"
+					},
+					"description": {
+					  "type": "string"
+					},
+					"remarks": {
+					  "type": "string"
+					}
+				}
+			  }
+		    }
+	    }
+      }
+	},
+    "message": {
+      "type": "string"
+    },
+	"status":{
+	  "type": "string"
+	}
+  },
+  "additionalProperties": false
+}

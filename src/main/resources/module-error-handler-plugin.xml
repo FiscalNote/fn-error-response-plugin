@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="Error Handler Plugin" prefix="error-handler-plugin"
+	category="SELECT"
+	doc:description="This module relies entirely in runtime provided components (no other Plugin dependencies)"
+	xmlns="http://www.mulesoft.org/schema/mule/module" 
+	xmlns:mule="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:core="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+           http://www.mulesoft.org/schema/mule/module http://www.mulesoft.org/schema/mule/module/current/mule-module.xsd
+           http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+           http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+	<operation name="on-error" displayName="Process Error">
+		<parameters>
+			<parameter name="error" type="any" defaultValue="#[error]"
+				role="PRIMARY"></parameter>
+
+			<parameter name="apiName" type="any" use="OPTIONAL"
+				displayName="API Name" defaultValue="#[default p('api.name')]" role="BEHAVIOUR"
+				order="1" />
+				
+			<parameter name="apiVersion" type="any" use="OPTIONAL"
+				displayName="API Version" defaultValue="#[p('api.version')]" role="BEHAVIOUR"
+				order="2" />
+			
+			<parameter name="errorStatus" type="string" use="OPTIONAL"
+				displayName="Meta Status" defaultValue="#[vars.errorStatus]" role="BEHAVIOUR"></parameter>
+					
+			<parameter name="errorInfo" type="any" use="OPTIONAL"
+				displayName="Meta Message" defaultValue="#[vars.errorInfo]" role="BEHAVIOUR"></parameter>
+				
+			<parameter name="errorData" type="any" use="OPTIONAL"
+				displayName="Data" defaultValue="#[vars.errorData]" role="BEHAVIOUR"></parameter>
+
+			<parameter name="badRequestError" type="string" use="OPTIONAL"
+				displayName="400 Bad Request" defaultValue="The request could not be understood by the server.  The client should update the request before resending."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="unauthorizedError" type="string" use="OPTIONAL"
+				displayName="401 Unauthorized" defaultValue="The request requires user authentication."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+				
+			<parameter name="forbiddenError" type="string" use="OPTIONAL"
+				displayName="403 Forbidden" defaultValue="The request authorization is forbidden. The request SHOULD NOT be repeated."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="notFoundError" type="string" use="OPTIONAL"
+				displayName="404 Not Found" defaultValue="The server has not found anything matching the Request-URI."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+				
+			<parameter name="methodNotAllowedError" type="string" use="OPTIONAL"
+				displayName="405 Method Not Allowed" defaultValue="The method specified is not allowed for the resource identified by the Request-URI."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="notAcceptableError" type="string" use="OPTIONAL"
+				displayName="406 Not Acceptable" defaultValue="The resource identified is not acceptable according to the accept headers sent in the request."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="timeoutError" type="string" use="OPTIONAL"
+				displayName="408 Timeout" defaultValue="The request has timed out."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="unsupportedMediaTypeError" type="string"
+				displayName="415 Unsupported Media Type" use="OPTIONAL"
+				defaultValue="The request is in a format not supported." role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="tooManyRequestsError" type="string" use="OPTIONAL"
+				displayName="429 Too Many Requests" defaultValue="Too many requests in a given amount of time. This API is rate-limited."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="serverError" type="string" use="OPTIONAL"
+				displayName="500 Internal Server Error" defaultValue="The server encountered an unexpected condition."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="notImplementedError" type="string"
+				displayName="501 Not Implemented" use="OPTIONAL"
+				defaultValue="The server does not support the functionality required to fulfill the request." role="BEHAVIOUR"
+				tab="Common Errors"></parameter>
+
+			<parameter name="connectivityError" type="string" use="OPTIONAL"
+				displayName="504 Gateway Timeout" defaultValue="The server did not receive a response from the upstream server specified by the URI."
+				role="BEHAVIOUR" tab="Common Errors"></parameter>
+
+			<parameter name="transactionId" type="string" use="OPTIONAL"
+				displayName="transactionId" defaultValue="#[vars.transactionId]" role="BEHAVIOUR"
+				tab="Tracking"></parameter>
+
+			<parameter name="errorTypes" type="string" use="OPTIONAL"
+				displayName="Error Types (DB:BAD_SQL_SYNTAX, CUSTOM:XYZ_ABC)"
+				defaultValue="#[vars.errorTypes default '']" role="BEHAVIOUR" tab="Custom Errors"></parameter>
+
+			<parameter name="errorCodes" type="string" use="OPTIONAL"
+				displayName="Error Codes (500, 499)" defaultValue="#[vars.errorCodes default '']" role="BEHAVIOUR"
+				tab="Custom Errors"></parameter>
+
+			<parameter name="errorMessages" type="string" use="OPTIONAL"
+				displayName="Error Messages (DB Error, Custom Error)" defaultValue="#[vars.errorMessages default '']"
+				role="BEHAVIOUR" tab="Custom Errors"></parameter>
+				
+			
+		</parameters>
+
+		<body>
+			<mule:set-variable
+				value="#[(vars.error.errorType.namespace default '') ++ ':' ++ (vars.error.errorType.identifier default '')]"
+				variableName="errorType"></mule:set-variable>
+
+			<mule:set-variable value="#[${file::dwl/customErrors.dwl}]"
+				doc:name="Custom Errors" variableName="customErrors" />
+			<mule:set-variable value="#[${file::dwl/defaultErrors.dwl}]"
+				doc:name="Default Errors" variableName="defaultErrors" />
+
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="errorDictionary"><![CDATA[%dw 2.0
+output application/json
+---
+vars.defaultErrors ++ vars.customErrors]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+
+			<ee:transform doc:name="Transform Message">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+var result = vars.errorDictionary filter ($.errorType == vars.errorType) map {
+    errorCode: $.errorCode,
+    errorMessage: $.errorMessage,
+    rfcName: $.rfcName default "Internal Server Error"
+}
+---
+result]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+				</ee:variables>
+			</ee:transform>
+
+			<mule:choice doc:name="Choice">
+				<mule:when expression="#[sizeOf(payload) == 1]">
+					<ee:transform doc:name="Transform Message">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="errorCode"><![CDATA[payload[0].errorCode]]></ee:set-variable>
+							<ee:set-variable variableName="errorMessage"><![CDATA[payload[0].errorMessage]]></ee:set-variable>
+							<ee:set-variable variableName="httpStatus"><![CDATA[payload[0].errorCode]]></ee:set-variable>
+							<ee:set-variable variableName="rfcName"><![CDATA[payload[0].rfcName]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</mule:when>
+				<mule:otherwise>
+					<ee:transform doc:name="Transform Message">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="errorCode"><![CDATA[500]]></ee:set-variable>
+							<ee:set-variable variableName="errorMessage"><![CDATA[vars.serverError default 'Mule backend error']]></ee:set-variable>
+							<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+							<ee:set-variable variableName="rfcName"><![CDATA["Internal Server Error"]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</mule:otherwise>
+			</mule:choice>
+			<ee:transform doc:name="Error Response">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+				output application/json
+				---
+				 {
+                    "apiName": vars.apiName,
+                    "version": vars.apiVersion,
+					"errorCode": vars.errorCode default '500',
+                    "transactionId": vars.transactionId,
+                    "details": [{
+						"code": if(vars.errorCode == '500') 'BACKEND_ERROR' else 'VALIDATION_ERROR',
+						"description": if(vars.errorCode == '500') 'Mule backend error' else 'API request data validation error',
+						"details": vars.errorMessage,
+						"errors": if(vars.errorInfo is Array) vars.errorInfo else if (vars.errorInfo == null) [ {errorCode: vars.errorCode default '', message: vars.errorMessage, description: 'Mule API error'} ] else [vars.errorInfo]
+                    }],
+					"message": vars.errorMessage,
+                    "status": vars.errorStatus default 'FAILED'
+                }
+				
+				]]></ee:set-payload>
+					<ee:set-attributes><![CDATA[%dw 2.0
+				output application/java
+				---
+				{
+					httpStatus: vars.httpStatus default 500
+				}]]></ee:set-attributes>
+				</ee:message>
+			</ee:transform>
+			<mule:logger level="ERROR" message="errorType=&quot;#[vars.error.errorType]&quot; errorDescription=&quot;#[vars.error.description]&quot; #[flow.name]: #[payload]"></mule:logger>
+		</body>
+		<output type="ErrorResponseType"></output>
+		<output-attributes type="OutputAttributesType"></output-attributes>
+	</operation>
+
+</module>
