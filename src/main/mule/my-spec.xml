@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="replace-me" doc:id="f4b43cf2-ff95-447e-8e86-418340c820ac" >
+		<http:listener doc:name="Listener" doc:id="c258410e-bbf0-42be-9cd5-1c26bd114342" config-ref="HTTP-Listener-config" path="${api.path}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0390cd5a-2895-431e-a91b-3423a3f08fab" />
+	</flow>
+</mule>

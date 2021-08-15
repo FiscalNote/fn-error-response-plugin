@@ -1,0 +1,14 @@
+http:
+  host: "0.0.0.0"
+  private:
+    port: "8081"
+
+api:
+  path: ""
+  autodiscovery:
+    id: ""
+    flow: "" 
+
+trustStore: 
+  path: certificates/truststore.jks # This is being loaded from fn-common-utils library   
+  type: jks
